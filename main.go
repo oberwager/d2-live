@@ -6,7 +6,7 @@ import (
 
 	statsd "github.com/DataDog/datadog-go/v5/statsd"
 	"github.com/husobee/vestigo"
-	"github.com/watt3r/d2-live/internal/handlers"
+	"github.com/oberwager/d2-live/internal/handlers"
 	ctxlog "oss.terrastruct.com/d2/lib/log"
 )
 

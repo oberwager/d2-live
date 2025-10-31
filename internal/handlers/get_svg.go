@@ -10,7 +10,7 @@ import (
 	"cdr.dev/slog"
 	"cdr.dev/slog/sloggers/sloghuman"
 	"github.com/husobee/vestigo"
-	"github.com/watt3r/d2-live/internal/urlenc"
+	"github.com/oberwager/d2-live/internal/urlenc"
 	"oss.terrastruct.com/d2/d2graph"
 	"oss.terrastruct.com/d2/d2layouts/d2dagrelayout"
 	"oss.terrastruct.com/d2/d2lib"

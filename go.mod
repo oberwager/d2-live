@@ -1,4 +1,4 @@
-module github.com/watt3r/d2-live
+module github.com/oberwager/d2-live
 
 go 1.22.5
 

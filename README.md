@@ -2,11 +2,12 @@
 <h1>D2-Live</h1>
 <h2>Generate Live Diagram URLs with D2</h2>
 
-[![Publish Status](https://github.com/Watt3r/d2-live/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Watt3r/d2-live/actions/workflows/docker-publish.yml)
-[![Build Status](https://github.com/Watt3r/d2-live/actions/workflows/build.yml/badge.svg)](https://github.com/Watt3r/d2-live/actions/workflows/build.yml)
-[![Uptime](https://uptime.lucas.tools/api/badge/2/uptime/240)](https://uptime.lucas.tools/)
-[![License](https://img.shields.io/badge/License-MIT-orange.svg)](https://github.com/Watt3r/d2-live/blob/master/LICENSE)
-[![Coverage Status](https://coveralls.io/repos/github/Watt3r/d2-live/badge.svg?branch=master)](https://coveralls.io/github/Watt3r/d2-live?branch=master)
+[![Publish Status](https://github.com/oberwager/d2-live/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/oberwager/d2-live/actions/workflows/docker-publish.yml)
+[![Build Status](https://github.com/oberwager/d2-live/actions/workflows/build.yml/badge.svg)](https://github.com/oberwager/d2-live/actions/workflows/build.yml)
+[![Uptime](https://argus.lucas.tools/api/badge/2/uptime/240)](https://argus.lucas.tools/)
+[![License](https://img.shields.io/badge/License-MIT-orange.svg)](https://github.com/oberwager/d2-live/blob/master/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/oberwager/d2-live/badge.svg?branch=master)](https://coveralls.io/github/oberwager/d2-live?branch=master)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-yellow?style=flat-square&logo=buy-me-a-coffee&logoColor=white)](https://www.buymeacoffee.com/lucasobe)
 </div>
 
 ## Aboout
@@ -35,7 +36,7 @@ D2-Live is a dynamic tool for creating live, embeddable diagrams using the D2 la
 You can use any of the [D2-Themes](https://d2lang.com/tour/themes) to customize the look of your diagram, just add `&theme=<theme_id>` to the URL.
 
 ## Contributing to D2-Live
-We welcome contributions! Please refer to our [Contribution Guidelines](https://github.com/Watt3r/d2-live/CONTRIBUTING.md) for details on how to submit changes, coding standards, and testing procedures.
+We welcome contributions! Please refer to our [Contribution Guidelines](https://github.com/oberwager/d2-live/CONTRIBUTING.md) for details on how to submit changes, coding standards, and testing procedures.
 
 ## License
-D2-Live is MIT licensed. For more information, please refer to the [LICENSE](https://github.com/Watt3r/d2-live/blob/master/LICENSE) file.
+D2-Live is MIT licensed. For more information, please refer to the [LICENSE](https://github.com/oberwager/d2-live/blob/master/LICENSE) file.
