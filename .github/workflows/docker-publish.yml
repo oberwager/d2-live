@@ -59,8 +59,9 @@ jobs:
       - name: Set the Kubernetes context
         uses: azure/k8s-set-context@v3
         with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBERNETES_SECRET }}
+          method: service-account
+          k8s-url: https://kube.argus.lucas.tools:6443
+          k8s-secret: ${{ secrets.K8S_SA_TOKEN }}
 
       - name: Checkout source code
         uses: actions/checkout@v4
