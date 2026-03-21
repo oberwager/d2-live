@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -38,7 +39,7 @@ func TestController_GetD2SVGHandler(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			c := &Controller{}
+			c := &Controller{Logger: slog.Default()}
 
 			req := httptest.NewRequest(http.MethodGet, "/svg", nil)
 			q := req.URL.Query()

@@ -3,7 +3,7 @@ module github.com/oberwager/d2-live
 go 1.22.5
 
 require (
-	github.com/DataDog/datadog-go/v5 v5.5.0
+	cdr.dev/slog v1.6.1
 	github.com/husobee/vestigo v1.1.1
 	github.com/stretchr/testify v1.9.0
 	oss.terrastruct.com/d2 v0.6.5
@@ -11,8 +11,6 @@ require (
 )
 
 require (
-	cdr.dev/slog v1.6.1 // indirect
-	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/PuerkitoBio/goquery v1.9.2 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect

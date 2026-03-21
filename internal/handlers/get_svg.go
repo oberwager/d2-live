@@ -16,13 +16,13 @@ import (
 	"oss.terrastruct.com/d2/d2lib"
 	"oss.terrastruct.com/d2/d2renderers/d2svg"
 	"oss.terrastruct.com/d2/d2themes/d2themescatalog"
-	"oss.terrastruct.com/d2/lib/log"
+	d2log "oss.terrastruct.com/d2/lib/log"
 	"oss.terrastruct.com/d2/lib/textmeasure"
 	"oss.terrastruct.com/util-go/go2"
 )
 
 func DiscardSlog(ctx context.Context) context.Context {
-	return log.With(ctx, slog.Make(sloghuman.Sink(io.Discard)))
+	return d2log.With(ctx, slog.Make(sloghuman.Sink(io.Discard)))
 }
 
 func (c *Controller) GetD2SVGHandler(rw http.ResponseWriter, req *http.Request) {
@@ -57,10 +57,12 @@ func (c *Controller) GetD2SVGHandler(rw http.ResponseWriter, req *http.Request) 
 		theme = d2themescatalog.NeutralDefault.ID
 	}
 
-	// Emit complexity metric
-	c.Metrics.Histogram("d2-live.complexity", float64(len(urlencoded)), []string{}, 1)
+	// Get sketch if provided
+	sketch := req.URL.Query().Get("sketch") == "1"
 
-	svg, err := c.handleGetD2SVG(ctx, urlencoded, theme)
+	c.Logger.Info("svg_request", "complexity", len(urlencoded), "theme", theme, "sketch", sketch)
+
+	svg, err := c.handleGetD2SVG(ctx, urlencoded, theme, sketch)
 
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
@@ -71,7 +73,7 @@ func (c *Controller) GetD2SVGHandler(rw http.ResponseWriter, req *http.Request) 
 	rw.Write(svg)
 }
 
-func (c *Controller) handleGetD2SVG(ctx context.Context, encoded string, theme int64) ([]byte, error) {
+func (c *Controller) handleGetD2SVG(ctx context.Context, encoded string, theme int64, sketch bool) ([]byte, error) {
 	decoded, err := urlenc.Decode(encoded)
 	if err != nil {
 		return nil, errors.New("Invalid Base64 data.")
@@ -84,6 +86,7 @@ func (c *Controller) handleGetD2SVG(ctx context.Context, encoded string, theme i
 	renderOpts := &d2svg.RenderOpts{
 		Pad:     go2.Pointer(int64(5)),
 		ThemeID: &theme,
+		Sketch:  &sketch,
 	}
 	compileOpts := &d2lib.CompileOptions{
 		LayoutResolver: layoutResolver,

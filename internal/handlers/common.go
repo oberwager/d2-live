@@ -1,28 +1,42 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
-
-	statsd "github.com/DataDog/datadog-go/v5/statsd"
 )
 
 type Controller struct {
-	Metrics *statsd.Client
+	Logger  *slog.Logger
 	Version string
 }
 
-func (c *Controller) StatsdMiddleware(f http.HandlerFunc) http.HandlerFunc {
+type responseWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (rw *responseWriter) WriteHeader(status int) {
+	rw.status = status
+	rw.ResponseWriter.WriteHeader(status)
+}
+
+func (c *Controller) LoggingMiddleware(f http.HandlerFunc) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		start := time.Now()
-		f(rw, req)
+		lrw := &responseWriter{ResponseWriter: rw, status: http.StatusOK}
+		f(lrw, req)
 
 		path := strings.Split(req.URL.Path, "/")[1]
 		if path == "" {
 			path = "svg"
 		}
 
-		c.Metrics.Histogram("d2-live."+path, time.Now().Sub(start).Seconds(), []string{}, 1)
+		c.Logger.Info("request",
+			"endpoint", path,
+			"duration_ms", time.Since(start).Milliseconds(),
+			"status", lrw.status,
+		)
 	}
 }

@@ -2,9 +2,10 @@ package main
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
-	statsd "github.com/DataDog/datadog-go/v5/statsd"
 	"github.com/husobee/vestigo"
 	"github.com/oberwager/d2-live/internal/handlers"
 	ctxlog "oss.terrastruct.com/d2/lib/log"
@@ -13,26 +14,19 @@ import (
 var Version string
 
 func main() {
-	metricsClient, err := statsd.New("statsd-exporter-service.hyperion.svc.cluster.local:8125",
-		statsd.WithTags([]string{"env:prod"}),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	ctxlog.Init()
 
 	c := handlers.Controller{
-		Metrics: metricsClient,
+		Logger:  logger,
 		Version: Version,
 	}
 
 	router := vestigo.NewRouter()
 
-	router.Get("/", c.GetD2SVGHandler, c.StatsdMiddleware)
-
-	router.Get("/info", c.GetInfoHandler, c.StatsdMiddleware)
-
-	router.Get("/svg/:encodedD2", c.GetD2SVGHandler, c.StatsdMiddleware)
+	router.Get("/", c.GetD2SVGHandler, c.LoggingMiddleware)
+	router.Get("/info", c.GetInfoHandler, c.LoggingMiddleware)
+	router.Get("/svg/:encodedD2", c.GetD2SVGHandler, c.LoggingMiddleware)
 
 	log.Fatal(http.ListenAndServe(":8090", router))
 }
