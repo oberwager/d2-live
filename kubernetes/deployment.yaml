@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: d2-live
-  namespace: hyperion
+  namespace: d2-live
 spec:
   selector:
     matchLabels:
@@ -19,7 +19,6 @@ spec:
       containers:
       - name: d2-live
         image: ghcr.io/oberwager/d2-live:latest
-        imagePullPolicy: "Always"
         ports:
         - name: web
           containerPort: 8090
@@ -33,6 +32,3 @@ spec:
           runAsGroup: 1000
           seccompProfile:
             type: RuntimeDefault
-      imagePullSecrets:
-        - name: github-container-registry
-      

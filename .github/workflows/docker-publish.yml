@@ -2,94 +2,121 @@ name: Docker publish
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  NAMESPACE: ${{ github.event.repository.name }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
+      id-token: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+      image_tag: ${{ steps.tag_version.outputs.next }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.1.0
 
       - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v4
+      - name: Get Next Version
+        id: tag_version
+        uses: ietf-tools/semver-action@v1
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha
+          token: ${{ github.token }}
+          branch: main
+          noVersionBumpBehavior: patch
+          noNewCommitBehavior: current
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        id: build
+        uses: docker/build-push-action@v7
         with:
           context: .
           build-args: |
-            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+            VERSION=${{ steps.tag_version.outputs.next }}
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.tag_version.outputs.next }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: mode=max
+          sbom: true
+
+      - name: Sign image with Cosign
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${DIGEST}
+
+      - name: Create Release
+        if: steps.tag_version.outputs.next != ''
+        uses: ncipollo/release-action@v1.20.0
+        with:
+          makeLatest: true
+          generateReleaseNotes: true
+          tag: ${{ steps.tag_version.outputs.next }}
+          name: ${{ steps.tag_version.outputs.next }}
+          body: ${{ steps.changelog.outputs.changes }}
+          token: ${{ github.token }}
+
 
   deploy:
     needs: [ build ]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment: production
     steps:
-      - uses: azure/setup-kubectl@v3
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_OAUTH_AUDIENCE }}
+          tags: tag:ci
+
+      - uses: azure/setup-kubectl@v4
 
       - name: Set the Kubernetes context
-        uses: azure/k8s-set-context@v3
+        uses: azure/k8s-set-context@v4
         with:
           method: service-account
-          k8s-url: https://kube.argus.lucas.tools:6443
+          k8s-url: ${{ secrets.K8S_URL }}
           k8s-secret: ${{ secrets.K8S_SA_TOKEN }}
 
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - uses: benjlevesque/short-sha@v2.1
-        id: short-sha
-
-      - uses: ASzc/change-string-case-action@v2
-        id: string
-        with:
-          string: ${{ env.IMAGE_NAME }}
-
-      - uses: Azure/k8s-create-secret@v4
-        with:
-          namespace: hyperion
-          container-registry-url: ghcr.io
-          container-registry-username: ${{ github.actor }}
-          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
-          secret-name: ghcr-pat
-
       - name: Deploy to the Kubernetes cluster
-        uses: azure/k8s-deploy@v4
+        uses: azure/k8s-deploy@v5
         with:
           action: deploy
-          namespace: hyperion
+          namespace: ${{ env.NAMESPACE }}
           manifests: |
-            kubernetes/deployment.yaml
-            kubernetes/ingress.yaml
-            kubernetes/service.yaml
+            kubernetes
           imagePullSecrets: ghcr-pat
-          images: ${{ env.REGISTRY }}/${{ steps.string.outputs.lowercase }}:sha-${{ steps.short-sha.outputs.sha }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build.outputs.image_tag }}

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: d2-live
-  namespace: hyperion
+  namespace: d2-live
 
 spec:
   ports:
