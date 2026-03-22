@@ -4,13 +4,11 @@ import (
 	"context"
 	"errors"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 
-	"cdr.dev/slog"
-	"cdr.dev/slog/sloggers/sloghuman"
 	"github.com/husobee/vestigo"
-	"github.com/oberwager/d2-live/internal/urlenc"
 	"oss.terrastruct.com/d2/d2graph"
 	"oss.terrastruct.com/d2/d2layouts/d2dagrelayout"
 	"oss.terrastruct.com/d2/d2lib"
@@ -18,11 +16,13 @@ import (
 	"oss.terrastruct.com/d2/d2themes/d2themescatalog"
 	d2log "oss.terrastruct.com/d2/lib/log"
 	"oss.terrastruct.com/d2/lib/textmeasure"
+	"oss.terrastruct.com/d2/lib/urlenc"
 	"oss.terrastruct.com/util-go/go2"
 )
 
 func DiscardSlog(ctx context.Context) context.Context {
-	return d2log.With(ctx, slog.Make(sloghuman.Sink(io.Discard)))
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	return d2log.With(ctx, logger)
 }
 
 func (c *Controller) GetD2SVGHandler(rw http.ResponseWriter, req *http.Request) {
