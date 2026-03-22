@@ -108,6 +108,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.1.0
+
       - name: Tailscale
         uses: tailscale/github-action@v4
         with:
