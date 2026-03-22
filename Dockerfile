@@ -1,25 +1,24 @@
-FROM golang:1.22 AS builder
-
-ENV GOPATH=/root/go
+FROM golang:1.22-alpine AS builder
 
 ARG VERSION=dev
+WORKDIR /build
 
-WORKDIR /app
+COPY go.mod go.sum* ./
+RUN go mod download || true
 
-COPY go.* ./
+COPY . .
 
-RUN --mount=type=cache,target=/go/pkg/mod go mod download
+RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -trimpath \
+    -ldflags "-w -s -extldflags '-static' -X 'main.Version=${VERSION}'" \
+    -o d2-live .
 
-COPY *.go ./
-COPY ./internal ./internal
+FROM scratch
 
-RUN --mount=type=cache,mode=0755,target=/root/.cache/go-build --mount=type=cache,mode=0755,target=/root/go \
-  go build \
-  -ldflags="-w -s -X 'main.Version=${VERSION}'" \
-  -o /http-server
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /build/d2-live /d2-live
 
+USER 65534:65534
 
 EXPOSE 8090
 
-ENTRYPOINT ["/http-server"]
-
+ENTRYPOINT ["/d2-live"]
