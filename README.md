@@ -4,7 +4,7 @@
 
 [![Publish Status](https://github.com/oberwager/d2-live/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/oberwager/d2-live/actions/workflows/docker-publish.yml)
 [![Build Status](https://github.com/oberwager/d2-live/actions/workflows/build.yml/badge.svg)](https://github.com/oberwager/d2-live/actions/workflows/build.yml)
-[![Uptime](https://argus.lucas.tools/api/badge/2/uptime/240)](https://argus.lucas.tools/)
+[![Uptime](https://uptime.lucas.tools/api/badge/2/uptime/240)](https://uptime.lucas.tools/)
 [![License](https://img.shields.io/badge/License-MIT-orange.svg)](https://github.com/oberwager/d2-live/blob/master/LICENSE)
 [![Coverage Status](https://coveralls.io/repos/github/oberwager/d2-live/badge.svg?branch=master)](https://coveralls.io/github/oberwager/d2-live?branch=master)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-yellow?style=flat-square&logo=buy-me-a-coffee&logoColor=white)](https://www.buymeacoffee.com/lucasobe)
